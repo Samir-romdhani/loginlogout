@@ -5,72 +5,73 @@
  */
 package tn.dev.jsf.bean;
 
+import tn.dev.jsf.dao.UserDao ;
 import java.io.Serializable;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpSession;
-
-
-import tn.dev.jsf.dao.LoginDAO;
-
-
-@ManagedBean
+ 
+@ManagedBean(name = "login")
 @SessionScoped
+/**
+ *
+ * @author User
+ */
 public class Login implements Serializable {
-
-	private static final long serialVersionUID = 1094801825228386363L;
-	
-	private String pwd;
-	private String msg;
-	private String user;
-
-	public String getPwd() {
-		return pwd;
-	}
-
-	public void setPwd(String pwd) {
-		this.pwd = pwd;
-	}
-
-	public String getMsg() {
-		return msg;
-	}
-
-	public void setMsg(String msg) {
-		this.msg = msg;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	//validate login
-	public String validateUsernamePassword() {
-		boolean valid = LoginDAO.validate(user, pwd);
-		if (valid) {
-			HttpSession session = SessionBean.getSession();
-			session.setAttribute("username", user);
-			return "admin";
-		} else {
-			FacesContext.getCurrentInstance().addMessage(
-					null,
-					new FacesMessage(FacesMessage.SEVERITY_WARN,
-							"Incorrect Username and Passowrd",
-							"Please enter correct username and Password"));
-			return "login";
-		}
-	}
-
-	//logout event, invalidate session
-	public String logout() {
-		HttpSession session = SessionBean.getSession();
-		session.invalidate();
-		return "login";
-	}
+ 
+    private static final long serialVersionUID = 1L;
+    private String password;
+    private String message, uname;
+ 
+    public String getMessage() {
+        return message;
+    }
+ 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+ 
+    public String getPassword() {
+        return password;
+    }
+ 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+ 
+    public String getUname() {
+        return uname;
+    }
+ 
+    public void setUname(String uname) {
+        this.uname = uname;
+    }
+ 
+    public String loginProject() {
+        boolean result = UserDao.login(uname, password);
+        if (result) {
+            // get Http Session and store username
+            HttpSession session = Util.getSession();
+            session.setAttribute("username", uname);
+ 
+            return "admin.xhtml";
+        } else {
+ 
+            FacesContext.getCurrentInstance().addMessage(
+                    null,
+                    new FacesMessage(FacesMessage.SEVERITY_WARN,
+                    "Invalid Login!",
+                    "Please Try Again!"+uname+" "+password));
+ 
+            return "login.xhtml";
+        }
+    }
+ 
+    public String logout() {
+      HttpSession session = Util.getSession();
+      session.invalidate();
+      return "login";
+   }
 }
